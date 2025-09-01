@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Winterview B2B Admin — 커피챗 분석 리포트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: { inter: ["Inter", "ui-sans-serif", "system-ui"] },
+            colors: {
+              primary: {
+                DEFAULT: "#006FEE",
+                50: "#E6F0FF",
+                100: "#CCE1FF",
+                200: "#99C4FF",
+                300: "#66A6FF",
+                400: "#3389FF",
+                500: "#006FEE",
+                600: "#0057D6",
+                700: "#0042A8",
+                800: "#002C6F",
+                900: "#001A42",
+              },
+              brand: {
+                green: "#22c55e",
+                amber: "#f59e0b",
+                rose: "#ef4444",
+                slate: "#94a3b8",
+              },
+            },
+            boxShadow: {
+              hero: "0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.06)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .card {
+        background-color: white;
+        border: 1px solid rgba(228, 228, 231, 0.7);
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
+          0 2px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      .dark .card {
+        background-color: rgba(39, 39, 42, 0.9);
+        border-color: rgb(63, 63, 70);
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border-radius: 9999px;
+        padding: 0.25rem 0.625rem;
+        font-size: 0.75rem;
+        line-height: 1rem;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .donut {
+        transform: rotate(-0deg);
+      }
+      .sparkline path {
+        fill: none;
+        stroke-width: 2.5;
+      }
+      .wc span {
+        display: inline-block;
+        margin: 0.25rem 0.35rem;
+        line-height: 1;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body
+    class="font-inter bg-zinc-50 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 antialiased"
+  >
+    <!-- Top Navbar -->
+    <header
+      class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/60 border-b border-zinc-200/70 dark:border-zinc-800"
+    >
+      <div
+        class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="h-8 w-8 grid place-items-center rounded-lg bg-primary-600 text-white font-extrabold"
+          >
+            W
+          </div>
+          <div class="font-semibold">Winterview Admin</div>
+          <nav class="ml-6 hidden md:flex items-center gap-1 text-sm">
+            <button
+              data-page="manage"
+              class="tab-btn px-3 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 aria-selected:bg-primary-50 aria-selected:text-primary-700 aria-selected:font-semibold"
+              aria-selected="true"
+            >
+              학생 기본 정보 관리
+            </button>
+            <button
+              data-page="stats"
+              class="tab-btn px-3 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              학생별 이용 통계
+            </button>
+            <button
+              data-page="resume"
+              class="tab-btn px-3 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              이력서 리뷰 분석
+            </button>
+          </nav>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="darkToggle" type="checkbox" class="sr-only peer" />
+            <div
+              class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+            ></div>
+            <span class="ml-2 text-sm">Dark</span>
+          </label>
+          <div class="hidden sm:flex items-center gap-2 text-sm">
+            <span class="px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800"
+              >K-UNIV 산학협력단</span
+            >
+            <span class="text-zinc-400">·</span>
+            <span class="text-zinc-600 dark:text-zinc-300">관리자 홍길동</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile tabs -->
+    <div
+      class="md:hidden sticky top-16 z-30 bg-white/80 dark:bg-zinc-900/70 backdrop-blur border-b border-zinc-200/70 dark:border-zinc-800"
+    >
+      <div
+        class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center gap-2 py-2 text-sm"
+      >
+        <button
+          data-page="manage"
+          class="tab-btn px-3 py-1.5 rounded-full bg-primary-50 text-primary-700"
+        >
+          학생 관리
+        </button>
+        <button data-page="stats" class="tab-btn px-3 py-1.5 rounded-full">
+          학생 통계
+        </button>
+        <button data-page="resume" class="tab-btn px-3 py-1.5 rounded-full">
+          이력서 리뷰
+        </button>
+      </div>
+    </div>
+
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+      <!-- PAGE 1: 학생 기본 정보 관리 -->
+      <section id="page-manage" class="space-y-6">
+        <!-- Filters + Actions -->
+        <div class="card p-5">
+          <div
+            class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+          >
+            <div class="flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                placeholder="이름, 학교, 이메일 검색"
+                class="w-72 max-w-full px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70 outline-none placeholder:text-zinc-400 focus:ring-2 ring-primary-500"
+              />
+              <select
+                class="px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70 outline-none"
+              >
+                <option>전체 상태</option>
+                <option>활성</option>
+                <option>휴면</option>
+                <option>인증 대기</option>
+              </select>
+              <select
+                class="px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70 outline-none"
+              >
+                <option>전체 학년/코호트</option>
+                <option>3학년</option>
+                <option>4학년</option>
+                <option>졸업생</option>
+              </select>
+              <select
+                class="px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70 outline-none"
+              >
+                <option>직종(희망)</option>
+                <option>프론트엔드</option>
+                <option>백엔드</option>
+                <option>데이터</option>
+                <option>디자인</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <button
+                class="px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+              >
+                CSV 내보내기
+              </button>
+              <button
+                class="px-3 py-2 rounded-xl bg-primary-600 text-white hover:bg-primary-500"
+              >
+                신규 등록
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- List + Side Drawer Edit -->
+        <div class="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+          <!-- table -->
+          <div class="card overflow-hidden">
+            <table class="min-w-full text-sm">
+              <thead class="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-500">
+                <tr>
+                  <th class="px-4 py-3 text-left font-medium">학생</th>
+                  <th class="px-4 py-3 text-left font-medium">소속/전공</th>
+                  <th class="px-4 py-3 text-left font-medium">연락처</th>
+                  <th class="px-4 py-3 text-left font-medium">희망직무</th>
+                  <th class="px-4 py-3 text-left font-medium">상태</th>
+                  <th class="px-4 py-3 text-right font-medium">최근 활동</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-200/70 dark:divide-zinc-700">
+                <tr
+                  class="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30 selectable"
+                  data-stu="1"
+                >
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <img
+                        src="https://i.pravatar.cc/48?img=5"
+                        class="h-8 w-8 rounded-full"
+                      />
+                      <div>
+                        <div class="text-sm font-medium">김하늘</div>
+                        <div class="text-xs text-zinc-500">2025-03-12 등록</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">한양대 / 컴퓨터공학</td>
+                  <td class="px-4 py-3">010-1234-5678</td>
+                  <td class="px-4 py-3">프론트엔드</td>
+                  <td class="px-4 py-3">
+                    <span class="chip bg-emerald-100 text-emerald-700"
+                      >활성</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 text-right text-zinc-500">1일 전</td>
+                </tr>
+                <tr
+                  class="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30 selectable"
+                  data-stu="2"
+                >
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <img
+                        src="https://i.pravatar.cc/48?img=12"
+                        class="h-8 w-8 rounded-full"
+                      />
+                      <div>
+                        <div class="text-sm font-medium">이준호</div>
+                        <div class="text-xs text-zinc-500">2025-05-02 등록</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">서울과기대 / 산업공학</td>
+                  <td class="px-4 py-3">010-2233-4455</td>
+                  <td class="px-4 py-3">데이터</td>
+                  <td class="px-4 py-3">
+                    <span class="chip bg-amber-100 text-amber-700"
+                      >인증 대기</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 text-right text-zinc-500">3일 전</td>
+                </tr>
+                <tr
+                  class="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30 selectable"
+                  data-stu="3"
+                >
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <img
+                        src="https://i.pravatar.cc/48?img=16"
+                        class="h-8 w-8 rounded-full"
+                      />
+                      <div>
+                        <div class="text-sm font-medium">박소연</div>
+                        <div class="text-xs text-zinc-500">2025-07-21 등록</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">부산대 / 경영학</td>
+                  <td class="px-4 py-3">010-9876-5432</td>
+                  <td class="px-4 py-3">제품기획</td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="chip bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200"
+                      >휴면</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 text-right text-zinc-500">21일 전</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- detail editor -->
+          <aside class="card p-5" id="editor">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="font-semibold" id="ed-name">김하늘</div>
+                <div class="text-sm text-zinc-500" id="ed-meta">
+                  한양대 · 컴퓨터공학
+                </div>
+              </div>
+              <button
+                class="px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-sm"
+              >
+                저장
+              </button>
+            </div>
+            <div class="mt-4 grid gap-4">
+              <label class="text-sm"
+                >이메일<input
+                  class="mt-1 w-full px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70"
+                  value="haneul.kim@univ.ac.kr"
+              /></label>
+              <label class="text-sm"
+                >전화<input
+                  class="mt-1 w-full px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70"
+                  value="010-1234-5678"
+              /></label>
+              <label class="text-sm"
+                >희망직무<select
+                  class="mt-1 w-full px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70"
+                >
+                  <option selected>프론트엔드</option>
+                  <option>백엔드</option>
+                  <option>데이터</option>
+                  <option>디자인</option>
+                </select></label
+              >
+              <div class="text-sm">
+                태그
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <span class="chip bg-primary-50 text-primary-700"
+                    >CS기초우수</span
+                  >
+                  <span class="chip bg-emerald-50 text-emerald-700"
+                    >적극적</span
+                  >
+                  <span class="chip bg-amber-50 text-amber-900"
+                    >시간관리필요</span
+                  >
+                </div>
+              </div>
+              <div class="text-sm">
+                본인인증 상태
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="chip bg-emerald-100 text-emerald-700">완료</span>
+                  <button
+                    class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-xs"
+                  >
+                    재요청
+                  </button>
+                </div>
+              </div>
+              <div class="text-sm">
+                최근 이용 요약
+                <ul class="mt-2 space-y-1 text-zinc-600 dark:text-zinc-300">
+                  <li>모의면접 (2025-08-10) · STAR 73점 · 긍정 68%</li>
+                  <li>커피챗 (2025-08-05) · 주요 관심: 프론트엔드, 스타트업</li>
+                  <li>이력서 리뷰 (2025-07-18) · 멘토 평점 4.5/5</li>
+                </ul>
+                <a
+                  class="text-sm text-primary-700 hover:underline"
+                  href="#stats"
+                  onclick="gotoPage('stats')"
+                  >학생 통계로 이동 →</a
+                >
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- PAGE 2: 학생별 서비스 이용 통계 및 현황 -->
+      <section id="page-stats" class="hidden space-y-6">
+        <!-- Header: picker + compare toggles -->
+        <div class="card p-5">
+          <div
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                src="https://i.pravatar.cc/64?img=5"
+                class="h-12 w-12 rounded-xl"
+              />
+              <div>
+                <div class="font-semibold">김하늘</div>
+                <div class="text-sm text-zinc-500">
+                  한양대 · 컴퓨터공학 · 프론트엔드
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <select
+                class="px-3 py-2 rounded-xl bg-zinc-100/70 dark:bg-zinc-700/70"
+              >
+                <option>전체 기간</option>
+                <option>최근 1개월</option>
+                <option>최근 3개월</option>
+                <option>최근 6개월</option>
+              </select>
+              <div class="flex items-center gap-2">
+                <label class="inline-flex items-center gap-1"
+                  ><input type="checkbox" class="accent-primary-600" checked />
+                  취업자 대비</label
+                >
+                <label class="inline-flex items-center gap-1"
+                  ><input type="checkbox" class="accent-primary-600" /> 같은
+                  기수 대비</label
+                >
+                <label class="inline-flex items-center gap-1"
+                  ><input type="checkbox" class="accent-primary-600" /> 같은
+                  직종 대비</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- A. 공통: 워드클라우드(빈도) -->
+        <div class="card p-5">
+          <h4 class="font-semibold">가장 많이 사용한 단어</h4>
+          <div
+            class="wc mt-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/70 border border-zinc-200/70 dark:border-zinc-700"
+          >
+            <span style="font-size: 36px; font-weight: 800">프로젝트</span>
+            <span
+              style="
+                font-size: 28px;
+                font-weight: 700;
+                transform: rotate(-6deg);
+              "
+              >데이터</span
+            >
+            <span style="font-size: 24px; font-weight: 700">협업</span>
+            <span style="font-size: 20px">리팩토링</span>
+            <span style="font-size: 18px">성능</span>
+            <span
+              style="font-size: 26px; font-weight: 700; transform: rotate(8deg)"
+              >API</span
+            >
+            <span style="font-size: 22px">문제해결</span>
+            <span style="font-size: 24px; font-weight: 700">리더십</span>
+            <span style="font-size: 16px">의사소통</span>
+            <span style="font-size: 20px">스테이크홀더</span>
+          </div>
+          <div class="mt-2 text-xs text-zinc-500">
+            모의면접/커피챗 STT에서 추출된 핵심어 빈도
+          </div>
+        </div>
+
+        <!-- B. 모의면접 분석 카드 -->
+        <div class="grid gap-6 lg:grid-cols-3">
+          <div class="card p-5 lg:col-span-2">
+            <div class="flex items-center justify-between">
+              <h4 class="font-semibold">모의면접 구조성 · 논리성</h4>
+              <div class="text-sm text-zinc-500">5점 만점</div>
+            </div>
+            <div class="mt-4 grid gap-4">
+              <div>
+                <div class="flex items-center justify-between text-sm">
+                  <span>STAR 구조 (S/T/A/R)</span><span>3.6 / 5</span>
+                </div>
+                <div
+                  class="mt-1 h-2.5 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden"
+                >
+                  <div class="h-full bg-primary-600" style="width: 72%"></div>
+                </div>
+                <div class="mt-2 grid grid-cols-4 gap-2 text-xs text-zinc-500">
+                  <div>S 3.5</div>
+                  <div>T 3.8</div>
+                  <div>A 4.0</div>
+                  <div>R 3.0</div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-sm">
+                  <span>논리성</span><span>3.9 / 5</span>
+                </div>
+                <div
+                  class="mt-1 h-2.5 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden"
+                >
+                  <div class="h-full bg-primary-600" style="width: 78%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-zinc-500">
+              비교 기준 선택 시 상단 토글에 따라 백분위/증감 표시
+            </div>
+          </div>
+          <div class="card p-5">
+            <h4 class="font-semibold">감정 & 불명확 표현</h4>
+            <div class="mt-4 grid grid-cols-2 gap-4">
+              <!-- Sentiment donut -->
+              <div class="flex flex-col items-center">
+                <svg viewBox="0 0 160 160" class="w-36 h-36">
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#e4e4e7"
+                    stroke-width="20"
+                    fill="none"
+                    class="text-zinc-200 dark:text-zinc-700 z-10"
+                  />
+                  <g class="donut">
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="64"
+                      stroke="#22c55e"
+                      stroke-width="20"
+                      stroke-dasharray="272 530"
+                      stroke-dashoffset="0"
+                      fill="none"
+                      class="text-green-500"
+                    />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="64"
+                      stroke="#ef4444"
+                      stroke-width="20"
+                      stroke-dasharray="84 718"
+                      stroke-dashoffset="-272"
+                      fill="none"
+                      class="text-red-500"
+                    />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="64"
+                      stroke="#94a3b8"
+                      stroke-width="20"
+                      stroke-dasharray="44 758"
+                      stroke-dashoffset="-356"
+                      fill="none"
+                      class="text-gray-500"
+                    />
+                  </g>
+                </svg>
+                <div class="mt-2 text-xs">긍정 68 · 부정 21 · 중립 11</div>
+              </div>
+              <!-- Vague donut -->
+              <div class="flex flex-col items-center">
+                <svg viewBox="0 0 160 160" class="w-36 h-36">
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="currentColor"
+                    stroke-width="20"
+                    fill="none"
+                    class="text-zinc-200 dark:text-zinc-700"
+                  />
+                  <g class="donut">
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="64"
+                      stroke="#f59e0b"
+                      stroke-width="20"
+                      stroke-dasharray="128 674"
+                      stroke-dashoffset="0"
+                      fill="none"
+                    />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="64"
+                      stroke="#22c55e"
+                      stroke-width="20"
+                      stroke-dasharray="272 530"
+                      stroke-dashoffset="-128"
+                      fill="none"
+                    />
+                  </g>
+                </svg>
+                <div class="mt-2 text-xs">불명확 32% · 명확 68%</div>
+              </div>
+            </div>
+            <div class="mt-2 text-xs text-zinc-500">
+              불명확 예: "약간", "대충", "뭐랄까" 등 메타표현 비율
+            </div>
+          </div>
+        </div>
+
+        <!-- C. 반응시간/길이 히스토그램 -->
+        <div class="grid gap-6 lg:grid-cols-2">
+          <div class="card p-5">
+            <h4 class="font-semibold">질문 → 대답 도달 시간 (초)</h4>
+            <svg viewBox="0 0 420 220" class="mt-4 w-full h-52">
+              <g fill="#006FEE" opacity="0.85">
+                <rect x="20" y="160" width="40" height="40" rx="6" />
+                <rect x="70" y="120" width="40" height="80" rx="6" />
+                <rect x="120" y="90" width="40" height="110" rx="6" />
+                <rect x="170" y="70" width="40" height="130" rx="6" />
+                <rect x="220" y="60" width="40" height="140" rx="6" />
+                <rect x="270" y="75" width="40" height="125" rx="6" />
+                <rect x="320" y="120" width="40" height="80" rx="6" />
+              </g>
+              <!-- <g font-size="12" fill="currentColor" opacity="0.6"> -->
+              <g font-size="12" fill="currentColor" opacity="0.6">
+                <text x="20" y="210">0-1s</text>
+                <text x="70" y="210">1-2s</text>
+                <text x="120" y="210">2-3s</text>
+                <text x="170" y="210">3-4s</text>
+                <text x="220" y="210">4-5s</text>
+                <text x="270" y="210">5-6s</text>
+                <text x="320" y="210">6s+</text>
+              </g>
+            </svg>
+            <div class="mt-2 text-xs text-zinc-500">
+              중앙값 4.2s · 상위 10% 2.6s (취업자 대비 -0.5s)
+            </div>
+          </div>
+          <div class="card p-5">
+            <h4 class="font-semibold">답변 시간/길이</h4>
+            <svg viewBox="0 0 420 220" class="mt-4 w-full h-52">
+              <g fill="#22c55e" opacity="0.85">
+                <rect x="20" y="130" width="40" height="70" rx="6" />
+                <rect x="70" y="110" width="40" height="90" rx="6" />
+                <rect x="120" y="70" width="40" height="130" rx="6" />
+                <rect x="170" y="50" width="40" height="150" rx="6" />
+                <rect x="220" y="80" width="40" height="120" rx="6" />
+                <rect x="270" y="120" width="40" height="80" rx="6" />
+                <rect x="320" y="160" width="40" height="40" rx="6" />
+              </g>
+              <g font-size="12" fill="currentColor" opacity="0.6">
+                <text x="20" y="210"><30s</text>
+                <text x="70" y="210">30-45</text>
+                <text x="120" y="210">45-60</text>
+                <text x="170" y="210">60-90</text>
+                <text x="220" y="210">90-120</text>
+                <text x="270" y="210">120-150</text>
+                <text x="320" y="210">150+</text>
+              </g>
+            </svg>
+            <div class="mt-2 text-xs text-zinc-500">
+              평균 78초 · 취업자 대비 +6초 (과다설명 경향)
+            </div>
+          </div>
+        </div>
+
+        <!-- D. 이력서/포폴 리뷰 섹션 -->
+        <div class="grid gap-6 lg:grid-cols-3">
+          <div class="card p-5 lg:col-span-2">
+            <div class="flex items-center justify-between">
+              <h4 class="font-semibold">이력서/포트폴리오 리뷰</h4>
+              <div class="text-sm text-zinc-500">멘토 평점 4.5/5</div>
+            </div>
+            <div class="mt-3 grid gap-4 md:grid-cols-2">
+              <div>
+                <div class="text-sm font-semibold">AI 분석 요약</div>
+                <ul
+                  class="mt-2 text-sm list-disc pl-5 space-y-1 text-zinc-700 dark:text-zinc-200"
+                >
+                  <li>정량 성과 표기 부족(성과지표 미기재 3곳)</li>
+                  <li>프로젝트 설명의 문제-해결-결과 흐름 일부 약함</li>
+                  <li>기술 스택 일관성 양호(React/TS/Query)</li>
+                </ul>
+              </div>
+              <div>
+                <div class="text-sm font-semibold">멘토 피드백 리스트</div>
+                <ul class="mt-2 text-sm space-y-2">
+                  <li class="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+                    문장 압축(군더더기 12% 감소 목표)
+                  </li>
+                  <li class="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+                    성과 수치화(트래픽 +45%, 오류 -30% 등)
+                  </li>
+                  <li class="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+                    키워드 최적화(직무 JD와 매칭)
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+              <div class="card p-4">
+                <div class="text-sm font-semibold">
+                  부족한 점 (워드클라우드)
+                </div>
+                <div class="wc mt-2">
+                  <span style="font-size: 26px; font-weight: 700"
+                    >수치근거</span
+                  >
+                  <span style="font-size: 22px">임팩트</span>
+                  <span style="font-size: 20px">우선순위</span>
+                  <span style="font-size: 18px">데이터증빙</span>
+                  <span style="font-size: 16px">문장길이</span>
+                </div>
+              </div>
+              <div class="card p-4">
+                <div class="text-sm font-semibold">잘한 점</div>
+                <div class="wc mt-2">
+                  <span style="font-size: 26px; font-weight: 700">협업</span>
+                  <span style="font-size: 22px">리팩토링</span>
+                  <span style="font-size: 20px">문제해결</span>
+                  <span style="font-size: 18px">리더십</span>
+                  <span style="font-size: 16px">코드품질</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 text-sm">
+              멘토의 전반 평가: <span class="font-semibold">87/100</span> (상위
+              24%)
+            </div>
+          </div>
+          <div class="card p-5">
+            <h4 class="font-semibold">합격예상 점수</h4>
+            <div class="mt-3 flex items-center gap-3">
+              <div class="text-4xl font-extrabold">82</div>
+              <div class="text-sm text-zinc-500">
+                최근 3회 기준 · 취업자 대비 +6
+              </div>
+            </div>
+            <div class="mt-4 text-xs text-zinc-500">
+              산식 예: 모의면접(50) + 리뷰(10) + 커피챗(10) + STT 지표(30)
+            </div>
+          </div>
+        </div>
+
+        <!-- E. 커피챗 섹션 -->
+        <div class="grid gap-6 lg:grid-cols-3">
+          <div class="card p-5">
+            <h4 class="font-semibold">관심 직무/산업</h4>
+            <div class="mt-3 text-sm">
+              <div class="mb-2 text-zinc-500">직무</div>
+              <div class="flex flex-wrap gap-2">
+                <span class="chip bg-primary-50 text-primary-700"
+                  >프론트엔드</span
+                >
+                <span class="chip bg-primary-50 text-primary-700"
+                  >제품기획</span
+                >
+              </div>
+              <div class="mt-4 mb-2 text-zinc-500">산업</div>
+              <div class="flex flex-wrap gap-2">
+                <span class="chip bg-zinc-100 dark:bg-zinc-700">스타트업</span>
+                <span class="chip bg-zinc-100 dark:bg-zinc-700">핀테크</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <h4 class="font-semibold">고민 분류</h4>
+            <div class="mt-3 grid place-items-center">
+              <svg viewBox="0 0 160 160" class="w-40 h-40">
+                <circle
+                  cx="80"
+                  cy="80"
+                  r="64"
+                  stroke="currentColor"
+                  stroke-width="20"
+                  fill="none"
+                  class="text-zinc-200 dark:text-zinc-700"
+                />
+                <g class="donut">
+                  <!-- 실무 34 / 조직 18 / 커리어 28 / 연봉복지 12 / 기타 8 -->
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#006FEE"
+                    stroke-width="20"
+                    stroke-dasharray="136 666"
+                    stroke-dashoffset="0"
+                    fill="none"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#22c55e"
+                    stroke-width="20"
+                    stroke-dasharray="72 730"
+                    stroke-dashoffset="-136"
+                    fill="none"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#f59e0b"
+                    stroke-width="20"
+                    stroke-dasharray="112 690"
+                    stroke-dashoffset="-208"
+                    fill="none"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#94a3b8"
+                    stroke-width="20"
+                    stroke-dasharray="48 754"
+                    stroke-dashoffset="-320"
+                    fill="none"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#ef4444"
+                    stroke-width="20"
+                    stroke-dasharray="32 770"
+                    stroke-dashoffset="-368"
+                    fill="none"
+                  />
+                </g>
+              </svg>
+              <div class="mt-2 text-xs text-center">
+                실무 34% · 조직문화 18% · 커리어 28% · 연봉/복지 12% · 기타 8%
+              </div>
+            </div>
+            <div class="mt-2 text-xs text-zinc-500">
+              동일 기수 대비: 실무/커리어 항목 비중이 높음(+9pp)
+            </div>
+          </div>
+          <div class="card p-5">
+            <h4 class="font-semibold">성향 분석 (요약)</h4>
+            <ul class="mt-2 text-sm space-y-2">
+              <li
+                class="p-2 rounded-lg bg-emerald-50 text-emerald-800 dark:bg-emerald-400/10 dark:text-emerald-300"
+              >
+                새로운 분야 호기심 높음
+              </li>
+              <li
+                class="p-2 rounded-lg bg-sky-50 text-sky-900 dark:bg-sky-400/10 dark:text-sky-300"
+              >
+                장기적 커리어 지향(3~5년 로드맵 보유)
+              </li>
+              <li
+                class="p-2 rounded-lg bg-amber-50 text-amber-900 dark:bg-amber-400/10 dark:text-amber-300"
+              >
+                실행 전 계획 선호(리스크 회피)
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- F. 시그니처: 커리어 MBTI -->
+        <div class="card p-5">
+          <div class="flex items-start justify-between">
+            <div>
+              <h4 class="font-semibold">시그니처: 커리어 MBTI</h4>
+              <div class="text-sm text-zinc-500">
+                서비스 이용 내용 기반 자동 생성(모의면접/커피챗/리뷰 지표)
+              </div>
+            </div>
+            <button
+              class="px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-sm"
+            >
+              PDF 저장
+            </button>
+          </div>
+          <div class="mt-4 grid gap-4 md:grid-cols-3">
+            <div class="card p-4">
+              <div class="text-sm font-semibold">타입</div>
+              <div class="mt-2 text-2xl font-extrabold">“조용한 선구자”</div>
+              <div class="text-xs text-zinc-500">
+                분석적 · 꾸준함 · 구조적 커뮤니케이션
+              </div>
+            </div>
+            <div class="card p-4">
+              <div class="text-sm font-semibold">근거 신호</div>
+              <ul
+                class="mt-2 text-sm list-disc pl-5 space-y-1 text-zinc-700 dark:text-zinc-200"
+              >
+                <li>STAR의 A(행동)·T(과제) 점수 상위</li>
+                <li>감정 분석에서 긍정 비중 68%</li>
+                <li>커피챗 고민: 실무·커리어 비중 높음</li>
+              </ul>
+            </div>
+            <div class="card p-4">
+              <div class="text-sm font-semibold">권장 액션</div>
+              <ul
+                class="mt-2 text-sm list-disc pl-5 space-y-1 text-zinc-700 dark:text-zinc-200"
+              >
+                <li>답변의 R(결과) 수치 보강</li>
+                <li>도달 시간 단축을 위한 버퍼 문장 준비</li>
+                <li>리뷰 키워드와 JD 매칭률 추가 개선</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE 3: 이력서 리뷰 분석 -->
+      <section id="page-resume" class="hidden space-y-6">
+        <!-- Header: 학생 정보 -->
+        <div class="card p-5">
+          <div
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                src="https://i.pravatar.cc/64?img=5"
+                class="h-12 w-12 rounded-xl"
+              />
+              <div>
+                <div class="font-semibold">김하늘</div>
+                <div class="text-sm text-zinc-500">이력서 리뷰 분석 리포트</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <button
+                class="px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+              >
+                PDF 저장
+              </button>
+              <button
+                class="px-3 py-2 rounded-xl bg-primary-600 text-white hover:bg-primary-500"
+              >
+                상세 리포트
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- A. 워드클라우드 -->
+        <!-- <div class="card p-5">
+          <h4 class="font-semibold">대화 핵심 키워드 분석</h4>
+          <div class="mt-16 flex justify-center">
+            <img
+              src="word-cloud.png"
+              alt="이력서 리뷰 대화 워드클라우드"
+              class="max-w-[50%] h-auto rounded-lg border border-zinc-200/70 dark:border-zinc-700 shadow-sm"
+            />
+          </div>
+          <div class="mt-3 text-xs text-zinc-500 text-center">
+            이력서 리뷰 대화에서 추출된 핵심 키워드 분석
+          </div>
+        </div> -->
+
+        <!-- B. 기본 정보 -->
+        <div class="card p-5">
+          <h4 class="font-semibold">멘티 기본 정보</h4>
+          <div class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <div
+                class="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2"
+              >
+                희망 직무
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <span class="chip bg-primary-50 text-primary-700">은행권</span>
+                <span class="chip bg-primary-50 text-primary-700"
+                  >새마을금고 중앙회</span
+                >
+              </div>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2"
+              >
+                희망 회사
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <span class="chip bg-emerald-50 text-emerald-700"
+                  >새마을금고 중앙회</span
+                >
+                <span class="chip bg-emerald-50 text-emerald-700"
+                  >IBK 기업은행</span
+                >
+              </div>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2"
+              >
+                강점
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <span class="chip bg-blue-50 text-blue-700">책임감</span>
+                <span class="chip bg-blue-50 text-blue-700">긍정성</span>
+                <span class="chip bg-blue-50 text-blue-700">솔선수범</span>
+              </div>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2"
+              >
+                약점
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <span class="chip bg-amber-50 text-amber-700">나이</span>
+                <span class="chip bg-amber-50 text-amber-700">학력</span>
+                <span class="chip bg-amber-50 text-amber-700">경력 부족</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- C. 대화 비율 분석 -->
+        <div class="grid gap-6 lg:grid-cols-3">
+          <div class="card p-5">
+            <h4 class="font-semibold">대화 비율 분석</h4>
+            <div class="mt-4 flex flex-col items-center">
+              <svg viewBox="0 0 160 160" class="w-40 h-40">
+                <circle
+                  cx="80"
+                  cy="80"
+                  r="64"
+                  stroke="#e4e4e7"
+                  stroke-width="20"
+                  fill="none"
+                />
+                <g class="donut">
+                  <!-- 멘토 55% / 멘티 45% -->
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#006FEE"
+                    stroke-width="20"
+                    stroke-dasharray="220 582"
+                    stroke-dashoffset="0"
+                    fill="none"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#22c55e"
+                    stroke-width="20"
+                    stroke-dasharray="180 622"
+                    stroke-dashoffset="-220"
+                    fill="none"
+                  />
+                </g>
+              </svg>
+              <div class="mt-2 text-xs text-center">멘토 55% · 멘티 45%</div>
+            </div>
+          </div>
+          <div class="card p-5 lg:col-span-2">
+            <h4 class="font-semibold">대화 총평</h4>
+            <div class="mt-3 text-sm text-zinc-700 dark:text-zinc-200">
+              대화는 주로 멘티의 취업 준비 상황과 이력서 및 자기소개서 작성에
+              대한 조언을 중심으로 진행되었습니다. 멘토는 멘티에게 은행권 취업을
+              위한 전략과 면접 준비 방법에 대해 상세히 설명하며, 멘티의 약점을
+              보완할 수 있는 방법을 제안했습니다.
+            </div>
+          </div>
+        </div>
+
+        <!-- D. 요약 분석 -->
+        <div class="card p-5">
+          <h4 class="font-semibold">요약 분석</h4>
+          <div class="mt-3 space-y-3">
+            <div class="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 은행권 취업을 위해서는 책임감과 긍정적인 마인드가
+                중요하다고 강조했습니다. 특히, 면접에서 솔직하고 진솔한 답변을
+                통해 자신의 강점을 어필하는 것이 중요하다고 조언했습니다.
+              </div>
+            </div>
+            <div class="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 이력서와 자기소개서 작성 시, 지원자의 경험을 잘
+                스토리텔링하여 멘토의 관심을 끌 수 있도록 해야 한다고
+                강조했습니다. 특히, PC방 근무 경력을 긍정적으로 활용할 수 있는
+                방법을 제안했습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- E. 주요 포인트 -->
+        <div class="card p-5">
+          <h4 class="font-semibold">주요 포인트</h4>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <div class="text-sm font-semibold mb-3">핵심 내용</div>
+              <div class="space-y-2">
+                <div
+                  class="p-3 rounded-lg bg-blue-50 text-blue-800 dark:bg-blue-400/10 dark:text-blue-300"
+                >
+                  <div class="text-sm">
+                    멘티는 은행권 취업을 희망하며, 새마을금고 중앙회를
+                    선호합니다.
+                  </div>
+                </div>
+                <div
+                  class="p-3 rounded-lg bg-blue-50 text-blue-800 dark:bg-blue-400/10 dark:text-blue-300"
+                >
+                  <div class="text-sm">
+                    멘티는 나이와 학력, 경력 부족을 약점으로 느끼고 있습니다.
+                  </div>
+                </div>
+                <div
+                  class="p-3 rounded-lg bg-blue-50 text-blue-800 dark:bg-blue-400/10 dark:text-blue-300"
+                >
+                  <div class="text-sm">
+                    멘티는 신용분석사 자격증을 준비 중이며, 토익 점수에 대한
+                    고민이 있습니다.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="text-sm font-semibold mb-3">중요한 이유</div>
+              <div class="space-y-2">
+                <div
+                  class="p-3 rounded-lg bg-purple-50 text-purple-800 dark:bg-purple-400/10 dark:text-purple-300"
+                >
+                  <div class="text-sm">
+                    멘티의 희망 직무와 회사는 이력서와 자기소개서 작성 방향에 큰
+                    영향을 미칩니다.
+                  </div>
+                </div>
+                <div
+                  class="p-3 rounded-lg bg-purple-50 text-purple-800 dark:bg-purple-400/10 dark:text-purple-300"
+                >
+                  <div class="text-sm">
+                    멘티의 약점은 면접 준비 시 보완해야 할 부분으로, 이를
+                    극복하기 위한 전략이 필요합니다.
+                  </div>
+                </div>
+                <div
+                  class="p-3 rounded-lg bg-purple-50 text-purple-800 dark:bg-purple-400/10 dark:text-purple-300"
+                >
+                  <div class="text-sm">
+                    멘티의 자격증 준비와 토익 점수는 취업 경쟁력을 높이는 요소로
+                    작용할 수 있습니다.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- F. 멘토 조언 -->
+        <div class="card p-5">
+          <h4 class="font-semibold">멘토 조언</h4>
+          <div class="mt-3 space-y-3">
+            <div
+              class="p-4 rounded-lg bg-green-50 text-green-800 dark:bg-green-400/10 dark:text-green-300"
+            >
+              <div class="text-sm">
+                멘토는 면접에서 솔직하고 진솔한 답변을 통해 자신의 강점을
+                어필하라고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg bg-green-50 text-green-800 dark:bg-green-400/10 dark:text-green-300"
+            >
+              <div class="text-sm">
+                멘토는 이력서와 자기소개서 작성 시, 지원자의 경험을 잘
+                스토리텔링하여 멘토의 관심을 끌 수 있도록 해야 한다고
+                강조했습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- G. 대화 상세 내용 -->
+        <div class="card p-5">
+          <h4 class="font-semibold">대화 상세 내용</h4>
+          <div class="mt-4 space-y-4">
+            <div class="border-l-4 border-primary-500 pl-4">
+              <div class="font-medium text-sm">
+                대화 시작 및 이력서 리뷰 준비
+              </div>
+              <div class="text-sm text-zinc-600 dark:text-zinc-300 mt-1">
+                멘토와 멘티는 대화를 시작하며 서로의 상태를 확인하고 이력서
+                리뷰를 준비합니다. 멘토는 이력서 리뷰를 통해 어떤 부분을 주로
+                다루고 싶은지 멘티에게 묻습니다.
+              </div>
+            </div>
+            <div class="border-l-4 border-green-500 pl-4">
+              <div class="font-medium text-sm">취업 희망 분야 및 지역</div>
+              <div class="text-sm text-zinc-600 dark:text-zinc-300 mt-1">
+                멘티는 은행권 취업을 희망하며, 새마을금고 중앙회를 선호한다고
+                말합니다. 멘토는 멘티의 희망 직무와 회사에 대해 더 자세히
+                묻습니다.
+              </div>
+            </div>
+            <div class="border-l-4 border-amber-500 pl-4">
+              <div class="font-medium text-sm">멘토 경험 및 취업 준비</div>
+              <div class="text-sm text-zinc-600 dark:text-zinc-300 mt-1">
+                멘토는 자신의 멘토 경험을 공유하며, 멘티에게 은행권 취업을 위한
+                준비 방법에 대해 조언합니다. 특히, 면접에서의 솔직한 답변과
+                자기소개서 작성의 중요성을 강조합니다.
+              </div>
+            </div>
+            <div class="border-l-4 border-purple-500 pl-4">
+              <div class="font-medium text-sm">NCS 시험 및 면접 준비</div>
+              <div class="text-sm text-zinc-600 dark:text-zinc-300 mt-1">
+                멘토는 NCS 시험과 면접 준비에 대해 설명하며, 멘티에게 면접에서의
+                커뮤니케이션 능력과 솔직한 답변의 중요성을 강조합니다.
+              </div>
+            </div>
+            <div class="border-l-4 border-rose-500 pl-4">
+              <div class="font-medium text-sm">자기소개서 첨삭 및 마무리</div>
+              <div class="text-sm text-zinc-600 dark:text-zinc-300 mt-1">
+                멘토는 멘티에게 자기소개서 첨삭을 제안하며, 대화를 마무리합니다.
+                멘티는 멘토에게 이메일 주소를 받아 자기소개서를 보내기로 합니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- H. 이력서 피드백 -->
+        <div class="card p-5">
+          <h4 class="font-semibold">이력서 피드백</h4>
+          <div class="mt-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 mb-4">
+            <div class="text-sm font-medium mb-2">총평</div>
+            <div class="text-sm text-zinc-700 dark:text-zinc-200">
+              멘토는 멘티의 이력서와 자기소개서 작성에 대한 피드백을 제공하며,
+              특히 경험을 잘 스토리텔링하여 멘토의 관심을 끌 수 있도록 해야
+              한다고 강조했습니다.
+            </div>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="p-4 rounded-lg bg-blue-50 dark:bg-blue-400/10">
+              <div
+                class="font-medium text-sm text-blue-800 dark:text-blue-300 mb-2"
+              >
+                이력서 작성 및 지원 경험
+              </div>
+              <div class="text-sm text-blue-700 dark:text-blue-200 mb-2">
+                이력서 작성 시 경험을 잘 스토리텔링해야 합니다.
+              </div>
+              <div class="text-xs text-blue-600 dark:text-blue-300">
+                멘토는 멘티에게 이력서 작성 시 자신의 경험을 잘 스토리텔링하여
+                멘토의 관심을 끌 수 있도록 해야 한다고 조언했습니다.
+              </div>
+            </div>
+            <div class="p-4 rounded-lg bg-green-50 dark:bg-green-400/10">
+              <div
+                class="font-medium text-sm text-green-800 dark:text-green-300 mb-2"
+              >
+                이력서 및 자기소개서 작성 조언
+              </div>
+              <div class="text-sm text-green-700 dark:text-green-200 mb-2">
+                자기소개서 작성 시 경험을 잘 녹여내야 합니다.
+              </div>
+              <div class="text-xs text-green-600 dark:text-green-300">
+                멘토는 멘티에게 자기소개서 작성 시 자신의 경험을 잘 녹여내어
+                멘토의 관심을 끌 수 있도록 해야 한다고 조언했습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- I. 멘티 질문 및 답변 -->
+        <div class="card p-5">
+          <h4 class="font-semibold">멘티 질문 및 답변</h4>
+          <div class="mt-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 mb-4">
+            <div class="text-sm font-medium mb-2">질문 총평</div>
+            <div class="text-sm text-zinc-700 dark:text-zinc-200">
+              멘티는 이력서 및 자기소개서 작성, 취업 준비 우선순위, 면접 준비
+              방법 등에 대해 질문하며, 멘토는 이에 대한 조언을 제공합니다.
+            </div>
+          </div>
+          <div class="grid gap-4 md:grid-cols-3">
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">
+                이력서 작성 및 지원 경험
+              </div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 멘티에게 이력서 작성 시 자신의 경험을 잘 스토리텔링하여
+                멘토의 관심을 끌 수 있도록 해야 한다고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">
+                학점 및 토익 점수의 중요성
+              </div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 학점과 토익 점수가 중요하지만, 결정적인 요소는 아니라고
+                설명했습니다. 멘티의 점수는 충분하다고 평가했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">
+                신용분석사 준비 및 토익 점수 고민
+              </div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 신용분석사를 먼저 준비하고, 시간이 남으면 토익 점수를
+                높이는 것이 좋다고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">
+                PC방 근무 경력의 자기소개서 활용
+              </div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 PC방 근무 경력을 자기소개서에 긍정적으로 활용할 수 있도록
+                스토리텔링을 잘 준비해야 한다고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">
+                금융권에서 중요시하는 가치
+              </div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 금융권에서 책임감과 긍정적인 마인드가 중요하다고
+                설명하며, 면접에서 솔직하고 진솔한 답변을 통해 자신의 강점을
+                어필해야 한다고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">
+                면접 시 긴장에 대한 우려
+              </div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 면접 시 긴장하는 것이 마이너스가 되지 않도록 자신감을
+                보여주는 것이 중요하다고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">
+                PT 및 토론 면접 준비 방법
+              </div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 PT 및 토론 면접 준비 시 스터디를 통해 연습하고,
+                논리적으로 답변하는 연습을 해야 한다고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">PC방 경력 증빙 방법</div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 PC방 경력을 자기소개서에 활용할 수 있도록 스토리텔링을 잘
+                준비해야 한다고 조언했습니다.
+              </div>
+            </div>
+            <div
+              class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700"
+            >
+              <div class="font-medium text-sm mb-2">취업 준비 우선순위</div>
+              <div class="text-sm text-zinc-700 dark:text-zinc-200">
+                멘토는 신용분석사를 먼저 준비하고, 자기소개서를 잘 작성하는 것이
+                중요하다고 조언했습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="py-8 text-center text-xs text-zinc-500">
+      © 2025 Winterview
+    </footer>
+
+    <script>
+      // Dark mode persistence
+      const darkToggle = document.getElementById("darkToggle");
+      const root = document.documentElement;
+      const setDark = (on) => {
+        root.classList.toggle("dark", on);
+        localStorage.setItem("wv-dark", on ? "1" : "0");
+        if (darkToggle) darkToggle.checked = on;
+      };
+      setDark(localStorage.getItem("wv-dark") === "1");
+      darkToggle?.addEventListener("change", (e) => setDark(e.target.checked));
+
+      // Tabs
+      const tabs = document.querySelectorAll(".tab-btn");
+      const pages = {
+        manage: document.getElementById("page-manage"),
+        stats: document.getElementById("page-stats"),
+        resume: document.getElementById("page-resume"),
+      };
+      const gotoPage = (key) => {
+        Object.values(pages).forEach((el) => el.classList.add("hidden"));
+        pages[key]?.classList.remove("hidden");
+        tabs.forEach((t) =>
+          t.setAttribute("aria-selected", t.dataset.page === key)
+        );
+        document.querySelectorAll(".md\:hidden .tab-btn").forEach((b) => {
+          if (b.dataset.page === key)
+            b.classList.add("bg-primary-50", "text-primary-700");
+          else b.classList.remove("bg-primary-50", "text-primary-700");
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+      tabs.forEach((btn) =>
+        btn.addEventListener("click", () => gotoPage(btn.dataset.page))
+      );
+      if (location.hash && pages[location.hash.replace("#", "")])
+        gotoPage(location.hash.replace("#", ""));
+      window.gotoPage = gotoPage;
+
+      // Select row to populate editor
+      const editor = {
+        name: document.getElementById("ed-name"),
+        meta: document.getElementById("ed-meta"),
+      };
+      document.querySelectorAll(".selectable").forEach((row) => {
+        row.addEventListener("click", () => {
+          const id = row.dataset.stu;
+          if (id === "1") {
+            editor.name.textContent = "김하늘";
+            editor.meta.textContent = "한양대 · 컴퓨터공학";
+          }
+          if (id === "2") {
+            editor.name.textContent = "이준호";
+            editor.meta.textContent = "서울과기대 · 산업공학";
+          }
+          if (id === "3") {
+            editor.name.textContent = "박소연";
+            editor.meta.textContent = "부산대 · 경영학";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
